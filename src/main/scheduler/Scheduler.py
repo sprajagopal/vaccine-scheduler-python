@@ -1,7 +1,7 @@
 from model.Vaccine import Vaccine, get_all_available_vaccines
 from model.Caregiver import Caregiver, get_available_caregivers, get_first_available_caregiver
 from model.Patient import Patient
-from model.Appointment import book_appointment
+from model.Appointment import book_appointment, get_appointments_for_patient, get_appointments_for_caregiver
 from util.Util import Util
 from db.ConnectionManager import ConnectionManager
 import pymssql
@@ -354,11 +354,18 @@ def add_doses(tokens):
 
 
 def show_appointments(tokens):
-    '''
-    TODO: Part 2
-    '''
-    pass
+    if current_caregiver == None and current_patient == None:
+        print("Please login first.")
+        return 
 
+    if current_caregiver is not None:
+        results = get_appointments_for_caregiver(current_caregiver)
+        for r in results:
+            print(f"Appointment ID: {r[0]}, vaccine name: {r[1]}, date: {str(r[2])}, patient: {r[4]}")
+    elif current_patient is not None:
+        results = get_appointments_for_patient(current_patient)
+        for r in results:
+            print(f"Appointment ID: {r[0]}, vaccine name: {r[1]}, date: {str(r[2])}, caregiver: {r[3]}")
 
 def logout(tokens):
     global current_caregiver, current_patient

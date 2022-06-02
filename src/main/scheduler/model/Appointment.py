@@ -4,6 +4,53 @@ from db.ConnectionManager import ConnectionManager
 import pymssql
 from hashlib import sha1
 
+def collate_row(row):
+    caregiver = row['Caregiver']
+    patient = row['Patient']
+    date = row['Time']
+    vaccine = row['Vaccine']
+    a = Appointment(patient, vaccine, date, caregiver)
+    return (a.get_appointment_id(), vaccine, date, caregiver, patient)
+
+def get_appointments_for_caregiver(caregiver):
+    cm = ConnectionManager()
+    conn = cm.create_connection()
+    cursor = conn.cursor(as_dict=True)
+    
+    get_appointment_details = "SELECT Caregiver, Patient, Vaccine, Time FROM Appointments WHERE Caregiver = %s"
+    try:
+        cursor.execute(get_appointment_details, caregiver.username)
+        results = []
+        for row in cursor:
+            print(row)
+            results.append(collate_row(row))
+        cm.close_connection()
+        return results
+    except pymssql.Error as e:
+        raise e
+    finally:
+        cm.close_connection()
+    return None
+ 
+def get_appointments_for_patient(patient):
+    cm = ConnectionManager()
+    conn = cm.create_connection()
+    cursor = conn.cursor(as_dict=True)
+    
+    get_appointment_details = "SELECT Caregiver, Patient, Vaccine, Time FROM Appointments WHERE Patient = %s"
+    try:
+        cursor.execute(get_appointment_details, patient.username)
+        results = []
+        for row in cursor:
+            results.append(collate_row(row))
+        cm.close_connection()
+        return results
+    except pymssql.Error as e:
+        raise e
+    finally:
+        cm.close_connection()
+    return None
+ 
 def book_appointment(caregiver, patient, vaccine, date):
     a = Appointment(patient, vaccine, date, caregiver)
     a.save_to_db()
@@ -16,6 +63,7 @@ class Appointment:
         self.date = date
         self.caregiver = caregiver
 
+       
     def get_appointment_id(self):
         def short_hash(obj):
             obj = str(obj)
