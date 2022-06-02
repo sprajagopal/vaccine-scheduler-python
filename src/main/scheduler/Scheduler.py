@@ -1,6 +1,7 @@
-from model.Vaccine import Vaccine
-from model.Caregiver import Caregiver
+from model.Vaccine import Vaccine, get_all_available_vaccines
+from model.Caregiver import Caregiver, get_available_caregivers, get_first_available_caregiver
 from model.Patient import Patient
+from model.Appointment import book_appointment
 from util.Util import Util
 from db.ConnectionManager import ConnectionManager
 import pymssql
@@ -162,8 +163,6 @@ def login_patient(tokens):
         print("Logged in as: " + username)
         current_patient = patient
 
-
-
 def login_caregiver(tokens):
     # login_caregiver <username> <password>
     # check 1: if someone's already logged-in, they need to log out first
@@ -199,20 +198,61 @@ def login_caregiver(tokens):
         print("Logged in as: " + username)
         current_caregiver = caregiver
 
-
 def search_caregiver_schedule(tokens):
-    """
-    TODO: Part 2
-    """
-    pass
+    if current_caregiver is None and current_patient is None:
+        print("Login first as Caregiver or Patient.")
+        return
+    
+    date = tokens[1]
+    date_tokens = date.split("-")
+    month = int(date_tokens[0])
+    day = int(date_tokens[1])
+    year = int(date_tokens[2])
+    d = datetime.datetime(year, month, day)
+    if current_caregiver is not None:
+        available_caregivers = get_available_caregivers(d)
+    elif current_patient is not None:
+        available_caregivers = get_available_caregivers(d)
 
+    print("Available caregivers")
+    for idx, c in enumerate(available_caregivers):
+        print(f"{idx + 1}: {c}")
+    print()
+
+    print("Available vaccines")
+    for idx, (name, dose) in enumerate(get_all_available_vaccines()):
+        print(f"{idx + 1}: {name}, {dose} doses")
 
 def reserve(tokens):
-    """
-    TODO: Part 2
-    """
-    pass
+    if current_patient is None:
+        print("Login first as Patient.")
+        return
+    
+    date = tokens[1]
+    date_tokens = date.split("-")
+    vaccine = tokens[2]
+    month = int(date_tokens[0])
+    day = int(date_tokens[1])
+    year = int(date_tokens[2])
+    d = datetime.datetime(year, month, day)
+    v = Vaccine(vaccine).get()
+    if v:
+        if v.available_doses == 0:
+            print(f"No doses of {vaccine} available.")
+            return
 
+        v.decrease_available_doses(1) 
+        caregiver = get_first_available_caregiver(d)
+        if caregiver:
+            appointment_id = book_appointment(caregiver, current_patient.username, vaccine, d)
+            print(f"Appointment ID: {appointment_id}, Caregiver username: {caregiver}.")
+            return
+        else:
+            print(f"No caregiver available for date {date}.")
+            return
+    else:
+        print(f"{vaccine} is not a valid Vaccine.")
+        return
 
 def upload_availability(tokens):
     #  upload_availability <date>
@@ -321,11 +361,13 @@ def show_appointments(tokens):
 
 
 def logout(tokens):
-    """
-    TODO: Part 2
-    """
-    pass
-
+    global current_caregiver, current_patient
+    if current_caregiver == None and current_patient == None:
+        print("Please login first.")
+    else: 
+        current_caregiver = None
+        current_patient = None
+        print("Successfully logged out!")
 
 def start():
     stop = False

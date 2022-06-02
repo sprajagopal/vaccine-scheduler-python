@@ -1,5 +1,12 @@
+import sys
+sys.path.append("../util/*")
+sys.path.append("../db/*")
+from util.Util import Util
+from db.ConnectionManager import ConnectionManager
+import pymssql
+
 class Patient:
-    def __init__(self, username password=None, salt=None, hash=None)
+    def __init__(self, username, password=None, salt=None, hash=None):
         self.username = username
         self.password = password
         self.salt = salt
@@ -8,7 +15,7 @@ class Patient:
     def get(self):
         cm = ConnectionManager()
         conn = cm.create_connection()
-        cursor = conn.cursor(as_fict=True)
+        cursor = conn.cursor(as_dict=True)
         
         get_patient_details = "SELECT Salt, Hash FROM Patients WHERE Username = %s"
         try:

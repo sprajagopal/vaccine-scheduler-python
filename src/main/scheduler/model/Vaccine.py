@@ -3,12 +3,30 @@ sys.path.append("../db/*")
 from db.ConnectionManager import ConnectionManager
 import pymssql
 
+def get_all_available_vaccines():
+    cm = ConnectionManager()
+    conn = cm.create_connection()
+    cursor = conn.cursor()
+
+    get_available_vaccines = "SELECT Name, Doses FROM Vaccines WHERE Doses != 0"
+    try:
+        cursor.execute(get_available_vaccines)
+        return [(name, dose) for name, dose in cursor]
+    except pymssql.Error:
+        raise
+    finally:
+        cm.close_connection()
+    return None
 
 class Vaccine:
     def __init__(self, vaccine_name, available_doses):
         self.vaccine_name = vaccine_name
         self.available_doses = available_doses
 
+    def __init__(self, vaccine_name):
+        self.vaccine_name = vaccine_name
+        self.get()
+        
     # getters
     def get(self):
         cm = ConnectionManager()

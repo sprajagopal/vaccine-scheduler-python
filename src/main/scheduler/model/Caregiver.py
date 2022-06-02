@@ -5,6 +5,39 @@ from util.Util import Util
 from db.ConnectionManager import ConnectionManager
 import pymssql
 
+def get_available_caregivers(date):
+    cm = ConnectionManager()
+    conn = cm.create_connection()
+    cursor = conn.cursor()
+
+    get_available = "SELECT Username FROM Caregivers SORT BY Username LIMIT 1 EXCEPT SELECT Username FROM Availabilities WHERE Time = %s"
+    try:
+        cursor.execute(get_available, date)
+        if len(row) == 0:
+            return None
+        return row[0][0]
+    except pymssql.Error:
+        raise
+    finally:
+        cm.close_connection()
+    return None
+
+def get_first_available_caregiver(date):
+    cm = ConnectionManager()
+    conn = cm.create_connection()
+    cursor = conn.cursor()
+
+    get_available = "SELECT Username FROM Availabilities WHERE Time = %s"
+    try:
+        cursor.execute(get_available, date)
+        return [row[0] for row in cursor]
+    except pymssql.Error:
+        raise
+    finally:
+        cm.close_connection()
+    return None
+
+
 
 class Caregiver:
     def __init__(self, username, password=None, salt=None, hash=None):

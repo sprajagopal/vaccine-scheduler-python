@@ -24,3 +24,11 @@ CREATE TABLE Patients (
     PRIMARY KEY (Username)
 );
 
+CREATE TABLE Appointments (
+    Caregiver varchar(255),
+    Patient varchar(255),
+    Vaccine varchar(255) REFERENCES Vaccines,
+    Time date,
+    foreign key (Time, Caregiver) REFERENCES Availabilities(Time, Username),
+    PRIMARY key (Patient, Vaccine, Time, Caregiver)
+);
