@@ -17,6 +17,28 @@ current_patient = None
 
 current_caregiver = None
 
+def is_strong_password(password):
+    if len(password) < 8:
+        return False
+    if password.lower() == password or password.upper() == password:
+        return False
+    num_found = False
+    for e in password:
+        if e in '0123456788':
+            num_found = True
+            break
+    if not num_found:
+        return False
+    symbol_found = False
+    for e in password:
+        if e in '!@#?':
+            symbol_found = True
+            break
+    if not symbol_found:
+        return False
+    
+    return True
+    
 def create_patient(tokens):
     # create_patient <username> <password>
     # check 1: the length for tokens need to be exactly 3 to include all information (with the operation name)
@@ -29,6 +51,11 @@ def create_patient(tokens):
     # check 2: check if the username has been taken already
     if username_exists_patient(username):
         print("Username taken, try again!")
+        return
+
+    if not is_strong_password(password):
+        print("We recommend using a stronger password!")
+        print("Use at least 8 characters, a mixture of uppercase and lowercase letters and numbers, and a special character from !, @, #, ?")
         return
 
     salt = Util.generate_salt()
