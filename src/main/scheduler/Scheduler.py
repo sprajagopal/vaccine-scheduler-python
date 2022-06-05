@@ -91,6 +91,11 @@ def create_caregiver(tokens):
         print("Username taken, try again!")
         return
 
+    if not is_strong_password(password):
+        print("We recommend using a stronger password!")
+        print("Use at least 8 characters, a mixture of uppercase and lowercase letters and numbers, and a special character from !, @, #, ?")
+        return
+
     salt = Util.generate_salt()
     hash = Util.generate_hash(password, salt)
 
@@ -430,7 +435,6 @@ def start():
             print("Please try again!")
             break
 
-        response = response.lower()
         tokens = response.split(" ")
         if len(tokens) == 0:
             ValueError("Please try again!")
