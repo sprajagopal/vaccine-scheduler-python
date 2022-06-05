@@ -234,6 +234,10 @@ def search_caregiver_schedule(tokens):
     if current_caregiver is None and current_patient is None:
         print("Login first as Caregiver or Patient.")
         return
+
+    if len(tokens) != 2:
+        print("Provide date for availability check")
+        return
     
     date = tokens[1]
     date_tokens = date.split("-")
@@ -258,6 +262,10 @@ def search_caregiver_schedule(tokens):
 def reserve(tokens):
     if current_patient is None:
         print("Login first as Patient.")
+        return
+
+    if len(tokens) != 3:
+        print("Provide a date and a vaccine")
         return
     
     date = tokens[1]
