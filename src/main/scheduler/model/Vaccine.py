@@ -19,14 +19,10 @@ def get_all_available_vaccines():
     return None
 
 class Vaccine:
-    def __init__(self, vaccine_name, available_doses):
+    def __init__(self, vaccine_name, available_doses=0):
         self.vaccine_name = vaccine_name
         self.available_doses = available_doses
 
-    def __init__(self, vaccine_name):
-        self.vaccine_name = vaccine_name
-        self.get()
-        
     # getters
     def get(self):
         cm = ConnectionManager()
